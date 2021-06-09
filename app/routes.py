@@ -6,7 +6,7 @@ from .models import Img
 
 
 @app.errorhandler(413)
-def size_to_big(error):
+def size_too_big(error):
     return 'Image must be smaller than 2 Mb', 413
 
 
@@ -64,8 +64,9 @@ def upload_multiple():
 
 
 @app.route('/images/<id>')
-def get_img(id):
+def get_image(id):
     img = Img.query.filter_by(id=id).first()
+    
     if not img:
         return f'No image with id={id}', 404
 
@@ -74,3 +75,15 @@ def get_img(id):
         mimetype=img.mimetype,
         attachment_filename='%s' % img.name
     )
+
+
+@app.route('/images/<id>/delete', methods=['DELETE'])
+def delete_image(id):
+    img = Img.query.filter_by(id=id).first()
+
+    if not img:
+        return f'No image with id={id}', 404
+
+    db.session.delete(img)
+    db.session.commit()
+    return jsonify('Image has been deleted.')
